@@ -13,7 +13,6 @@ export default function LoginScreen() {
 
     const handleSubmit = () => {
         if (loginUser(login, password)) {
-            navigation.navigate("Dashboard");
         } else {
             Alert.alert("Identifiants incorrects");
         }
