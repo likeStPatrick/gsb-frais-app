@@ -1,36 +1,83 @@
-import { createContext, useContext, useState } from "react";
-import signIn from "services";
+import { createContext, useContext, useState, useEffect } from "react";
+import {signIn, signOut} from "gsb-frais-app/services/authServices";
+import AsyncStorage from "@react-native-async-storage/async-storage"
+
+
 // 1. Création du contexte
 const AuthContext = createContext();
+
 // 2. Fournisseur du contexte (AuthProvider)
 export function AuthProvider({ children }) {
     const [token, setToken] = useState(null);
     const [user, setUser] = useState(null);
+    const [sessionLoading, setSessionLoading]=useState(true);
+
+    useEffect(() => {
+const restoreSession = async () => {
+try{
+const storedUser = await getCurrentUser();
+const storedToken =await getAuthToken("token");
+if (storedUser && storedToken) {
+setUser(storedUser)
+setToken(storedToken)
+}
+} catch(error){
+console.error("Erreur lors de la restauration de session : ", error) ;
+}
+finally{
+    setSessionLoading(false)
+}
+};
+ restoreSession();
+},[]);
+
+
     // 3. Fonction de connexion
     async function loginUser(login, password) {
         const data = await signIn(login, password);
         setUser(data.visiteur);
         setToken(data.token);
-        return data
+        return data;
+    }
+
+    // 4. Fonction de déconnexion
+    const logoutUser = async () => {
+        await signOut();
+        setUser(null);
+        setToken(null); 
     };
 
-    setUser(login);
-    return true;
-
-};
-// 4. Fonction de déconnexion
-const logoutUser = () => {
-    // ToDo : réinitialiser la valeur de l’état à null
-    setUser(null);
-};
-// 5. Valeurs exposées aux composants enfants et rendu des composants enfants avec {children}
-return (
-    <AuthContext.Provider value={{ user, loginUser, logoutUser }}>
-        {children}
-    </AuthContext.Provider>
-);
+    // 5. Valeurs exposées aux composants enfants et rendu des composants enfants avec {children}
+    return (
+        <AuthContext.Provider value={{ user, loginUser, logoutUser, token,sessionLoading }}>
+            {children}
+        </AuthContext.Provider>
+    );
+} // L'accolade de fermeture du composant AuthProvider doit être placée ici !
 
 // 6. Hook personnalisé pour utiliser le contexte facilement
 export function useAuth() {
     return useContext(AuthContext);
 }
+
+export const getCurrentUser = async () =>{
+    const raw = await AsyncStorage.getItem("user");
+    if (raw){
+        return JSON.parse(raw)
+
+    }else{
+        return null;
+    }
+}
+
+export const getAuthToken = async()=>{
+    const token= await AsyncStorage.getItem("token");
+    if(token){
+        return token
+    } else {
+        return null
+    }
+
+}
+
+

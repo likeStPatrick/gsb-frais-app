@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "./screens/HomeScreen";
@@ -25,7 +25,10 @@ export default function App() {
   );
 }
 function AppNavigator() {
-  const { user } = useAuth();
+  const { user, sessionloading} = useAuth();
+  if (sessionloading){
+    return <ActivityIndicator> style={{flex:1}}</ActivityIndicator>
+  }
   return (
     <Stack.Navigator>
       <Stack.Screen name="Home" component={HomeScreen} />

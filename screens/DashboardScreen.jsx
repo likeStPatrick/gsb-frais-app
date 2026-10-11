@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import FraisCard from "../components/FraisCard";
 import fraisData from "../data/frais.json";
 import styles from "../styles/searchStyle";
+import { useAuth } from "../context/AuthContext";
 
 export default function DashboardScreen() {
   const [fraisList, setFraisList] = useState([]);
@@ -11,7 +12,7 @@ export default function DashboardScreen() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterNonNull, setFilterNonNull] = useState(true);
   const [montantMin, setMontantMin] = useState("");
-
+const { user, token } = useAuth();
   const filteredFrais = fraisList
     .filter((frais) => !filterNonNull || frais.montantvalide !== null)
     .filter((frais) => {
@@ -28,11 +29,27 @@ export default function DashboardScreen() {
     );
 
   useEffect(() => {
-    setTimeout(() => {
-      setFraisList(fraisData);
-      setIsLoading(false);
-    }, 500);
-  }, []);
+const fetchFrais = async () => {
+try {
+    const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
+        method: "GET", 
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}` // 
+        }
+    });
+
+    const data = await response.json();
+ data= await response.json();
+fraisList(data);
+setSessionLoading(false);
+} catch (error) {
+console.error("Erreur lors du chargement des frais :", error);
+setSessionLoading(false);
+}
+};
+fetchFrais();
+}, []);
 
   if (isLoading) return <ActivityIndicator size="large" style={{ marginTop: 40 }} />;
 
