@@ -27,17 +27,26 @@ export default function App() {
 function AppNavigator() {
   const { user, sessionloading} = useAuth();
   if (sessionloading){
-    return <ActivityIndicator> style={{flex:1}}</ActivityIndicator>
+    return <ActivityIndicator style={{flex:1}}/>
   }
   return (
-    <Stack.Navigator>
+   <Stack.Navigator>
+  {user ? (
+    // Groupe pour les utilisateurs connectés
+    <Stack.Group navigationKey="connecte">
+      <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      <Stack.Screen name="FraisAdd" component={FraisAddScreen} />
+      <Stack.Screen name="FraisEdit" component={FraisEditScreen} />
       <Stack.Screen name="Home" component={HomeScreen} />
-      {user ? (
-        <Stack.Screen name="Dashboard" component={DashboardScreen} />
-      ) : (
-        <Stack.Screen name="Login" component={LoginScreen} />
-      )}
-    </Stack.Navigator>
+    </Stack.Group>
+  ) : (
+    // Groupe pour les utilisateurs non connectés (invités)
+    <Stack.Group navigationKey="invite">
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Login" component={LoginScreen} />
+    </Stack.Group>
+  )}
+</Stack.Navigator>
   );
 }
 

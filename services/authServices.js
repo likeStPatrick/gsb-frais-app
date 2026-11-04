@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-export const API_URL = "http://gsbfrais.julliand.ispconfig.lmdsio.com/api/";
+export const API_URL = "https://apigsbfrais.wasmer.app/api/";
 export async function signIn(login, pwd) {
     const response = await fetch(`${API_URL}visiteur/auth`, {
         method: "POST",
@@ -14,5 +14,6 @@ export async function signIn(login, pwd) {
     return data;
 };
 export async function signOut(){
-    await AsyncStorage.removeItem("user","token");
+    await AsyncStorage.removeItem("user");
+    await AsyncStorage.removeItem("token");
 }

@@ -2,9 +2,10 @@ import { View, FlatList, StyleSheet, Text, ActivityIndicator, TextInput, Switch 
 import { useState, useEffect } from "react";
 import Navbar from "../components/Navbar";
 import FraisCard from "../components/FraisCard";
-import fraisData from "../data/frais.json";
 import styles from "../styles/searchStyle";
 import { useAuth } from "../context/AuthContext";
+import { API_URL } from "../services/authServices";
+
 
 export default function DashboardScreen() {
   const [fraisList, setFraisList] = useState([]);
@@ -12,7 +13,8 @@ export default function DashboardScreen() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterNonNull, setFilterNonNull] = useState(true);
   const [montantMin, setMontantMin] = useState("");
-const { user, token } = useAuth();
+  const { user, token } = useAuth();
+
   const filteredFrais = fraisList
     .filter((frais) => !filterNonNull || frais.montantvalide !== null)
     .filter((frais) => {
@@ -29,27 +31,26 @@ const { user, token } = useAuth();
     );
 
   useEffect(() => {
-const fetchFrais = async () => {
-try {
-    const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
-        method: "GET", 
-        headers: {
+    const fetchFrais = async () => {
+      try {
+        const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
+          method: "GET",
+          headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${token}` // 
-        }
-    });
+          }
+        });
 
-    const data = await response.json();
- data= await response.json();
-fraisList(data);
-setSessionLoading(false);
-} catch (error) {
-console.error("Erreur lors du chargement des frais :", error);
-setSessionLoading(false);
-}
-};
-fetchFrais();
-}, []);
+        const data = await response.json();
+        setFraisList(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Erreur lors du chargement des frais :", error);
+        setIsLoading(false);
+      }
+    };
+    fetchFrais();
+  }, []);
 
   if (isLoading) return <ActivityIndicator size="large" style={{ marginTop: 40 }} />;
 
@@ -70,7 +71,7 @@ fetchFrais();
         <Text style={styles.texteFiltre}>Afficher seulement les frais avec un montant validé</Text>
       </View>
       <TextInput
-       
+
         value={montantMin}
         onChangeText={setMontantMin}
         keyboardType="numeric"
