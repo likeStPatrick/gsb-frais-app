@@ -19,12 +19,21 @@ function Navbar() {
                 )}
             </View>
             {user ? (
+                <>
+                <Pressable onPress={() => {
+                    navigation.navigate("FraisAdd");
+                }}>
+                    <Text style={navBarStyles.connexion}>Proposer un frais</Text>
+                </Pressable>
+                
                 <Pressable onPress={() => {
                     logoutUser();
                     navigation.navigate("Home");
                 }}>
                     <Text style={navBarStyles.connexion}>Déconnexion</Text>
                 </Pressable>
+
+                </>
             ) : (
                 <Pressable onPress={() => navigation.navigate("Login")}>
                     <Text style={navBarStyles.connexion}>Connexion</Text>

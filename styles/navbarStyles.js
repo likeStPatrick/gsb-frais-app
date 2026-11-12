@@ -3,7 +3,7 @@ const navBarStyles = StyleSheet.create({
     general: {
         flexDirection: "row",
         justifyContent: "space-between",
-        padding: 16,
+        padding: 10,
         backgroundColor: "#333"
 
 
