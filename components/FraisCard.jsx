@@ -1,37 +1,10 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Pressable} from 'react-native';
 import donnefrais from '../data/frais.json';
-import { StyleSheet } from 'react-native';
-const styles = StyleSheet.create({
-card: {
-padding: 16,
-borderRadius: 12,
-backgroundColor: "#FFFFFF",
-marginBottom: 12,
-shadowColor: "#000000",
-shadowOffset: { width: 0, height: 2 },
-shadowOpacity: 0.1,
-shadowRadius: 6,
-elevation: 3,
-},
-title: {
-fontSize: 18,
-fontWeight: "600",
-color: "#161B33",
-},
-meta: {
-fontSize: 14,
-color: "#5B6270",
-marginTop: 4,
-},
-montant: {
-fontSize: 14,
-fontWeight: "bold",
-color: "#0E8C7C",
-marginTop: 4,
-},
-});
-export default function FraisCard({ frais }) {
+import  styles from '../styles/fraisCardStyles';
+
+
+export default function FraisCard({ frais, onEdit, onDelete }) {
 return (
 <View style={styles.card}>
 <Text style={styles.title}>Note [{frais.id_frais}] Visiteur
@@ -39,6 +12,14 @@ n°{frais.id_visiteur} - {frais.anneemois}</Text>
 <Text style={styles.meta}>Date de modification : {frais.datemodification}</Text>
 <Text style={styles.meta}>Montant validé : {frais.montantvalide}</Text>  
 <Text style={styles.meta}>Montant saisi : —</Text>
+<Pressable onPress={() => onEdit && onEdit(frais.id_frais)} style={styles.editButton}>
+    <Text>Modifier</Text>
+</Pressable>
+<Pressable onPress={() => onDelete && onDelete(frais.id_frais)} style={styles.deleteButton}>
+    <Text>Suppimer</Text>
+</Pressable>
+
+
 </View>
 );
 }

@@ -1,49 +1,62 @@
 
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigation } from "@react-navigation/native";
 import { View, Text, TextInput, Pressable, Alert } from "react-native";
 import styles from "../styles/loginStyle";
+import Navbar from "../components/Navbar";
 
 export default function LoginScreen() {
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
     const { loginUser } = useAuth();
-    const navigation = useNavigation();
+   const[error, setError]= useState("");
+   const [submitting, setSubmitting]=useState(false);
+   
+   
 
-    const handleSubmit = () => {
-        if (loginUser(login, password)) {
-            navigation.navigate("Dashboard")
-        } else {
-            Alert.alert("Identifiants incorrects");
+    const handleSubmit = async () => {
+        setSubmitting(true);
+        setError("");
+    try{
+        const data = await loginUser(login, password);
+        } catch (e){
+           setError(e.message);
+        }finally{
+            setSubmitting(false);
+
         }
     };
 
     return (
-        <View style={styles.container}>
-
-            <Text style={styles.title}>Connexion</Text>
+        <View style={ { flex: 1 } }>
+            <Navbar />
+            <View style={styles.container}>
+                <Text style={styles.title}>Connexion</Text>
             <View>
                 <Text>Login :</Text>
-                <TextInput style={styles.input}
-
+                <TextInput 
+                    style={styles.input}
                     value={login}
                     onChangeText={setLogin}
                     autoCapitalize="none"
-                    autoCorrect={false}
+                    
                 />
             </View>
-            <Text>Password :</Text>
-            <TextInput style={styles.input}
 
+            <View>
+            <Text>Password :</Text>
+            <TextInput 
+                style={styles.input}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <View style={styles.button}>
-                <Pressable onPress={handleSubmit}>
-                    <Text style={styles.buttonText}>Se connecter</Text>
+            </View>
+
+                <Pressable style={styles.button} onPress={handleSubmit} disabled={submitting}>
+                    <Text style={styles.buttonText}>{submitting ? "Connexion..." : "Se connecter"}</Text>
                 </Pressable>
+                {error ?<Text style={{ "color" : "red" }}>{error}</Text> : null}
             </View>
         </View>
     );

@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
-import {signIn, signOut} from "gsb-frais-app/services/authServices";
+import {signIn, signOut} from "../services/authServices";
 import AsyncStorage from "@react-native-async-storage/async-storage"
 
 
