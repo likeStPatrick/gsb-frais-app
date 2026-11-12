@@ -26,10 +26,7 @@ export function getFraisList(idVisiteur, token) {
 }
 
 export function getFrais(idFrais, token) {
-  // Todo : compléter en renvoyant l’appel à la fonction request() avec les bons arguments
-  return request(`frais/${idFrais}`,token)
-
-  
+  return request(`frais/${idFrais}`, token);
 }
 
 export function addFrais(frais, token) {
@@ -40,12 +37,15 @@ export function addFrais(frais, token) {
 }
 
 export function updateFrais(frais, token) {
-  // Todo : compléter en renvoyant l’appel à la fonction request() avec les bons arguments
-  return request(`frais/modif/${frais}`,token)
-
+  return request("frais/modif", token, {
+    method: "PUT", 
+    body: JSON.stringify(frais),
+  });
 }
 
 export function deleteFrais(idFrais, token) {
-  // Todo : compléter en renvoyant l’appel à la fonction request() avec les bons arguments
-  return request(`frais/suppr/${idFrais}`,token)
+  return request("frais/suppr", token, {
+    method: "DELETE",
+    body: JSON.stringify({ id_frais: idFrais }),
+  });
 }

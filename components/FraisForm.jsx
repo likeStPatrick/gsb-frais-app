@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { View, Text, Pressable, TextInput } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { API_URL } from "../config";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "../styles/fraisFormStyles"
 
 export default function FraisForm({ frais = null, onSubmit }) {

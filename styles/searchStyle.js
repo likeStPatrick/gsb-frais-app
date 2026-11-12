@@ -11,6 +11,10 @@ const SearchStyles = StyleSheet.create({
   marginTop: -20,
   justifyContent: 'center',
   marginLeft: 75,
+},
+error: {
+color: "red",
+marginBottom: 12,
 }
 });
 export default SearchStyles

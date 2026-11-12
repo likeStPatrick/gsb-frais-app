@@ -1,43 +1,57 @@
 import { useState, useEffect } from "react";
-import { ActivityIndicator,Text} from "react-native";
-import { useRoute } from "@react-navigation/native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { API_URL } from "../config";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
 import FraisForm from "../components/FraisForm";
-export default function FraisEditScreen() {
-    const route = useRoute();
-    const { id } = route.params; // récupération de l’id passé en paramètre de navigate()
-    const [frais, setFrais] = useState(null);
-    const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        const fetchFrais = async () => {
-            try {
-                const token = await AsyncStorage.getItem("token");
-                // ToDo : appeler `${API_URL}frais/${id}` avec fetch et le header Authorization
-                const response = await fetch(`${API_URL}frais/${id}`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
+import Navbar from "../components/Navbar";
+import { useAuth } from "../context/AuthContext";
+import { getFrais, updateFrais } from "../services/fraisServices";
 
-            }});
-            // ToDo : comme dans FraisForm, lever une erreur si la réponse n’est pas ok
-                if (response.ok != true) {
-                    const data = await response.json().catch(() => ({}));
-                    throw new Error(data.error || `Erreur HTTP ${response.status}`);
-                }
-                const data = await response.json()
-                setFrais(data)
-            } catch (error) {
-                console.error("Erreur fetchFrais:", error.message);
-
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchFrais();
-    }, [id]);
-    if (loading) return <ActivityIndicator size="large" />;
-    if (!frais) return <Text>Frais non trouvé</Text>;
-    return <FraisForm frais={frais} />;
+export default function FraisEditScreen({ navigation, route }) {
+const { id } = route.params;
+const { token } = useAuth();
+const [frais, setFrais] = useState(null);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState("");
+// Récupération du frais à modifier
+useEffect(() => {
+const fetchFrais = async () => {
+try {
+setFrais(await getFrais(id, token));
+} catch (err) {
+console.error("Erreur:", err);
+setError(err.message);
+} finally {
+setLoading(false);
+}
+};
+fetchFrais();
+}, [id, token]);
+// Appelée par FraisForm avec les valeurs saisies : on les fusionne
+// avec les champs non modifiables du frais d’origine
+async function handleUpdate(values) {
+await updateFrais(
+{
+id_frais: frais.id_frais,
+id_visiteur: frais.id_visiteur,
+id_etat: frais.id_etat, // Conserver l’état actuel
+montantvalide: frais.montantvalide,
+...values,
+},
+token
+);
+navigation.navigate("Dashboard");
+}
+let content;
+if (loading) {
+content = <ActivityIndicator size="large" />;
+} else if (!frais) {
+content = <Text>{error || "Frais non trouvé"}</Text>;
+} else {
+content = <FraisForm frais={frais} onSubmit={handleUpdate} />;
+}
+return (
+<View style={{ flex: 1 }}>
+<Navbar />
+<View style={styles.screen}>{content}</View>
+</View>
+);
 }

@@ -1,12 +1,11 @@
 import { View, FlatList, StyleSheet, Text, ActivityIndicator, TextInput, Switch, Alert } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useState, useEffect, useCallback } from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import Navbar from "../components/Navbar";
 import FraisCard from "../components/FraisCard";
+import Navbar from "../components/Navbar";
 import styles from "../styles/searchStyle";
 import { useAuth } from "../context/AuthContext";
-import { API_URL } from "../config";
+import { getFraisList, deleteFrais } from "../services/fraisServices";
 
 export default function DashboardScreen() {
   const [fraisList, setFraisList] = useState([]);
@@ -16,7 +15,19 @@ export default function DashboardScreen() {
   const [montantMin, setMontantMin] = useState("");
   const { user, token } = useAuth();
   const navigation = useNavigation();
+  const [error, setError] = useState("");
+  async function removeFrais(id) {
+
+      try {
+        await deleteFrais(id, token);
+        setFraisList(prev => prev.filter(item => item.id_frais !== id));
+        
+      } catch (error) {
+        Alert.alert("Erreur lors de la suppression:", error.message);
+      }
+    };
   const handleDelete = (id) => {
+    
     Alert.alert(
       "Confirmation",
       "Êtes-vous sûr de vouloir supprimer cette note de frais ?",
@@ -25,31 +36,8 @@ export default function DashboardScreen() {
         {
           text: "Supprimer",
           style: "destructive",
-          onPress: async () => {
-            try {
-              const token = await AsyncStorage.getItem("token");
-              // ToDo : appeler `${API_URL}frais/suppr` avec fetch, méthode DELETE,
-              const response = await fetch(`${API_URL}frais/suppr`,
+          onPress:() => removeFrais(id)
 
-                {
-                  method: "DELETE",
-                  headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                  },
-                  body: JSON.stringify({ id_frais: id })
-                });
-                if (!response.ok) {
-                const data = await response.json().catch(() => ({}));
-                throw new Error(data.error || `Erreur HTTP ${response.status}`);}
-              // body JSON.stringify({ id_frais: id }), header Authorization
-              // ToDo : mettre à jour fraisList en filtrant la note de frais
-              setFraisList(prev=>prev.filter(item=>item.id_frais !== id));
-
-            } catch (error) {
-              console.error("Erreur lors de la suppression:", error);
-            }
-          },
         },
       ]
     );
@@ -75,19 +63,11 @@ export default function DashboardScreen() {
       const fetchFrais = async () => {
         if (!user || !token) return;
         try {
-          const response = await fetch(`${API_URL}frais/liste/${user.id_visiteur}`, {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              "Authorization": `Bearer ${token}` // 
-            }
-          });
-
-          const data = await response.json();
-
-          setFraisList(data);
-        } catch (error) {
-          console.error("Erreur lors du chargement des frais :", error);
+          setFraisList(await getFraisList(user.id_visiteur, token));
+          setError("");
+        } catch (err) {
+          console.error("Erreur lors de la récupération des frais :", err);
+          setError(err.message);
         } finally {
           setIsLoading(false);
         }
@@ -120,6 +100,7 @@ export default function DashboardScreen() {
         keyboardType="numeric"
         style={styles.input}
       />
+      {error ? <Text style={styles.error}>{error}</Text> : null}
       <FlatList
         data={filteredFrais}
         keyExtractor={(item) => item.id_frais.toString()}
